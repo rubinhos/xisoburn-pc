@@ -1,0 +1,4 @@
+[submodule "xisoburn"]
+	path = xisoburn
+	url = https://github.com/rubinhos/xisoburn.git
+	branch = master
