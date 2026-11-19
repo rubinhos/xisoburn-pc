@@ -21,7 +21,7 @@ namespace xISOBurn
         private readonly TextBox _outputName = new TextBox { Width = 260 };
         private readonly TextBox _outputFolder = new TextBox { Width = 360 };
         private readonly CheckBox _writeImage = new CheckBox { Text = "Write the image (off = only test the drive and build the map)", AutoSize = true };
-        private readonly CheckBox _decryptCss = new CheckBox { Text = "Decrypt CSS (DVD-Video)", AutoSize = true };
+        private readonly CheckBox _decryptCss = new CheckBox { Text = "Decrypt CSS (DVD-Video) and CPPM (DVD-Audio)", AutoSize = true };
         private readonly CheckBox _decryptBluray = new CheckBox { Text = "Decrypt Blu-ray (AACS / BD+, with the key files)", AutoSize = true };
         private readonly CheckBox _markDecrypted = new CheckBox { Text = "Mark the Blu-ray image as decrypted (for VLC and Kodi)", AutoSize = true };
         private readonly ComboBox _sectorsPerRead = Combo();

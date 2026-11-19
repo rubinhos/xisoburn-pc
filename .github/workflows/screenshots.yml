@@ -26,8 +26,13 @@ jobs:
 
       - name: Build
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          dotnet publish src/xISOBurn/xISOBurn.csproj -c Release -r win-x64 --self-contained true -o out
+          # The version of the latest release, so the log line in the screenshot matches what people download.
+          $tag = gh release view --repo $env:GITHUB_REPOSITORY --json tagName -q .tagName
+          $version = if ($tag) { $tag.TrimStart('v') } else { "1.0.0" }
+          dotnet publish src/xISOBurn/xISOBurn.csproj -c Release -r win-x64 --self-contained true -p:Version=$version -o out
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Take the screenshots
