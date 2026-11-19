@@ -363,6 +363,21 @@ namespace xISOBurn
             SetThreadExecutionState(on ? ES_CONTINUOUS | ES_SYSTEM_REQUIRED : ES_CONTINUOUS);
         }
 
+        /// <summary>Exclusive access and a locked tray for the length of a copy or a scan (best effort).</summary>
+        private void BeginExclusiveUse()
+        {
+            if (_drive == null) return;
+            try { _log.Info("Drive " + _drive.DeviceId + ": " + _drive.BeginExclusive() + "."); }
+            catch (Exception ex) { _log.Info("Drive: exclusive access not available: " + ex.Message); }
+        }
+
+        private void EndExclusiveUse()
+        {
+            if (_drive == null) return;
+            try { _drive.EndExclusive(); _log.Info("Drive " + _drive.DeviceId + ": released (tray unlocked)."); }
+            catch (Exception ex) { _log.Info("Drive: could not release the exclusive access: " + ex.Message); }
+        }
+
         // ------------------------------------------------------------ detect
 
         private async Task<bool> DetectAsync(uint timeout)
@@ -478,6 +493,7 @@ namespace xISOBurn
                 }
 
                 KeepAwake(true);
+                BeginExclusiveUse();
                 awake = true;
                 _cts = new CancellationTokenSource();
                 SetBusy(true, true);
@@ -534,7 +550,7 @@ namespace xISOBurn
             }
             finally
             {
-                if (awake) KeepAwake(false);
+                if (awake) { KeepAwake(false); EndExclusiveUse(); }
                 if (_cts != null) { _cts.Dispose(); _cts = null; }
                 if (!_closing) SetBusy(false, false);
                 else _busy = false;
@@ -587,6 +603,7 @@ namespace xISOBurn
                     return;
                 }
                 KeepAwake(true);
+                BeginExclusiveUse();
                 awake = true;
                 _cts = new CancellationTokenSource();
                 SetBusy(true, true);
@@ -608,7 +625,7 @@ namespace xISOBurn
             }
             finally
             {
-                if (awake) KeepAwake(false);
+                if (awake) { KeepAwake(false); EndExclusiveUse(); }
                 if (_cts != null) { _cts.Dispose(); _cts = null; }
                 if (!_closing) SetBusy(false, false);
                 else _busy = false;
