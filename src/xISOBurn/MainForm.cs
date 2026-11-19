@@ -542,14 +542,22 @@ namespace xISOBurn
                 if (result.RefusedThisRun >= RescueJob.RefusalNoticeAfter)
                     status += " " + RefusalMessage(result.RefusedThisRun);
                 _statusText.Text = status;
+                if (cfg.NotifyWhenDone) NotifyRunEnded(result, extraRetryPass, RescueJob.BaseNameFor(cfg, _probe));
             }
             catch (Exception ex)
             {
                 _log.Info("ERROR while copying: " + ex);
-                if (!_closing) _statusText.Text = "Error: " + ex.Message;
+                if (!_closing)
+                {
+                    _statusText.Text = "Error: " + ex.Message;
+                    string msg;
+                    if (CopyConfig.Load(_folder, out msg).NotifyWhenDone)
+                        Notify("Copy stopped", ex.Message, ToolTipIcon.Error);
+                }
             }
             finally
             {
+                if (!_closing) Text = "xISOBurn" + (IsAdministrator() ? " (administrator)" : "");
                 if (awake) { KeepAwake(false); EndExclusiveUse(); }
                 if (_cts != null) { _cts.Dispose(); _cts = null; }
                 if (!_closing) SetBusy(false, false);
@@ -576,6 +584,94 @@ namespace xISOBurn
                 _refusalShown = true;
                 _statusText.Text = RefusalMessage(p.Refused) + " \"Pause / cancel\" stops the copy.";
             }
+        }
+
+        // ------------------------------------------------------------ "copy finished" notification
+
+        private NotifyIcon _notifyIcon;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct FLASHWINFO
+        {
+            public uint cbSize;
+            public IntPtr hwnd;
+            public uint dwFlags;
+            public uint uCount;
+            public uint dwTimeout;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern bool FlashWindowEx(ref FLASHWINFO info);
+        private const uint FLASHW_ALL = 0x3, FLASHW_TIMERNOFG = 0xC;
+
+        /// <summary>
+        /// The end of a copy the user did not stop: a finished copy, one with unreadable sectors, a retry
+        /// pass, or an error. A pause chosen by the user gives no notification.
+        /// </summary>
+        private void NotifyRunEnded(RescueResult result, bool extraRetryPass, string name)
+        {
+            if (_closing || result.Cancelled) return;
+            long failed = result.Bad + result.Pending;
+            if (result.Error != null)
+                Notify("Copy stopped", name + ": " + result.Error, ToolTipIcon.Error);
+            else if (extraRetryPass)
+                Notify("Retry finished", name + ": recovered " + result.RecoveredThisRun.ToString("N0") + " of " +
+                       result.RetriedThisRun.ToString("N0") + " sector(s); " + failed.ToString("N0") + " still unreadable.",
+                       failed > 0 ? ToolTipIcon.Warning : ToolTipIcon.Info);
+            else if (result.Finished && failed == 0)
+                Notify("Copy finished", name + ": the whole disc was read" +
+                       (result.Hashes != null ? "; the checksums are in the .hashes file." : "."), ToolTipIcon.Info);
+            else if (result.Finished)
+                Notify("Copy finished with unreadable sectors", name + ": " + failed.ToString("N0") +
+                       " sector(s) could not be read. \"Retry failed\" tries them once more.", ToolTipIcon.Warning);
+            else
+                Notify("Copy finished (partial range)", name + ": the range set in Settings was copied.", ToolTipIcon.Info);
+        }
+
+        /// <summary>
+        /// A Windows notification (a tray balloon, shown as a toast on Windows 10 and 11), a system sound,
+        /// and a flashing taskbar button while xISOBurn is not in front. Clicking the notification brings
+        /// the window back.
+        /// </summary>
+        private void Notify(string title, string text, ToolTipIcon icon)
+        {
+            try
+            {
+                if (text.Length > 250) text = text.Substring(0, 247) + "...";
+                if (_notifyIcon == null)
+                {
+                    _notifyIcon = new NotifyIcon { Icon = Icon ?? SystemIcons.Application, Text = "xISOBurn" };
+                    _notifyIcon.BalloonTipClicked += (s, e) => RestoreWindow();
+                    _notifyIcon.Click += (s, e) => RestoreWindow();
+                }
+                _notifyIcon.Visible = true;
+                _notifyIcon.ShowBalloonTip(15000, title, text, icon);
+
+                if (icon == ToolTipIcon.Info) System.Media.SystemSounds.Asterisk.Play();
+                else System.Media.SystemSounds.Exclamation.Play();
+
+                if (Form.ActiveForm != this)
+                {
+                    var fi = new FLASHWINFO
+                    {
+                        cbSize = (uint)Marshal.SizeOf(typeof(FLASHWINFO)),
+                        hwnd = Handle,
+                        dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG, // flash until the window comes to the front
+                    };
+                    FlashWindowEx(ref fi);
+                }
+                _log.Info("Notification: " + title + " - " + text);
+            }
+            catch (Exception ex)
+            {
+                _log.Info("Notification not shown: " + ex.Message);
+            }
+        }
+
+        private void RestoreWindow()
+        {
+            if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+            Activate();
         }
 
         private string RefusalMessage(long refused)
@@ -711,6 +807,7 @@ namespace xISOBurn
                 _closing = true;
                 base.OnFormClosing(e);
                 CloseDrive();
+                if (_notifyIcon != null) { _notifyIcon.Visible = false; _notifyIcon.Dispose(); _notifyIcon = null; }
                 return;
             }
             e.Cancel = true;

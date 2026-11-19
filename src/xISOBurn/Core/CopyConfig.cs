@@ -57,6 +57,8 @@ namespace xISOBurn.Core
         public string OutputFolder = "";
         /// <summary>The drive used last ("E:"); "" = the first optical drive.</summary>
         public string DriveId = "";
+        /// <summary>A Windows notification, a sound and a flashing taskbar button when a copy finishes or stops.</summary>
+        public bool NotifyWhenDone = true;
 
         /// <summary>
         /// Applies the settings form on top of 'current'. Keys are the config.json names; a boolean is on
@@ -77,6 +79,7 @@ namespace xISOBurn.Core
             if (f.ContainsKey("OutputFolder")) cfg.OutputFolder = get("OutputFolder");
             cfg.SkipOnErrors = flag("SkipOnErrors");
             cfg.OutputName = get("OutputName");
+            cfg.NotifyWhenDone = flag("NotifyWhenDone");
 
             int timeout, passes, spr, speed, driveRetries;
             long start, limit;
@@ -152,6 +155,7 @@ namespace xISOBurn.Core
                     cfg.MarkBlurayDecrypted = boo("MarkBlurayDecrypted", cfg.MarkBlurayDecrypted);
                     cfg.OutputFolder = str("OutputFolder", cfg.OutputFolder);
                     cfg.DriveId = str("DriveId", cfg.DriveId);
+                    cfg.NotifyWhenDone = boo("NotifyWhenDone", cfg.NotifyWhenDone);
                 }
                 catch (Exception ex)
                 {
@@ -206,7 +210,8 @@ namespace xISOBurn.Core
             sb.Append("  \"DecryptBluray\": ").Append(DecryptBluray ? "true" : "false").Append(",\n");
             sb.Append("  \"MarkBlurayDecrypted\": ").Append(MarkBlurayDecrypted ? "true" : "false").Append(",\n");
             sb.Append("  \"OutputFolder\": ").Append(Q(OutputFolder)).Append(",\n");
-            sb.Append("  \"DriveId\": ").Append(Q(DriveId)).Append("\n");
+            sb.Append("  \"DriveId\": ").Append(Q(DriveId)).Append(",\n");
+            sb.Append("  \"NotifyWhenDone\": ").Append(NotifyWhenDone ? "true" : "false").Append("\n");
             sb.Append("}\n");
             Directory.CreateDirectory(folder);
             File.WriteAllText(Path.Combine(folder, FileName), sb.ToString(), new UTF8Encoding(false));
@@ -222,7 +227,8 @@ namespace xISOBurn.Core
                    " | write image: " + (WriteImage ? "yes" : "no") +
                    " | decrypt CSS: " + (DecryptCss ? "yes" : "no") +
                    " | decrypt Blu-ray: " + (DecryptBluray ? (MarkBlurayDecrypted ? "yes, marked" : "yes") : "no") +
-                   " | destination: " + CopyStore.Resolve(OutputFolder);
+                   " | destination: " + CopyStore.Resolve(OutputFolder) +
+                   " | notify when done: " + (NotifyWhenDone ? "yes" : "no");
         }
     }
 }
