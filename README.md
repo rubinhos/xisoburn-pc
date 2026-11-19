@@ -48,8 +48,15 @@ as administrator.
 | **Progress** | The bar shows how much of the disc is copied. The text shows the current pass, speed and time left |
 | Log | Everything the app does, line by line. Select lines and press Ctrl+C to copy them |
 
-Usually you only need **Detect disc** and then **Copy / resume**. The PC does not go to sleep while a
-copy or a scan is running.
+Usually you only need **Detect disc** and then **Copy / resume**. While a copy or a scan is running:
+
+- the PC does not go to sleep;
+- xISOBurn has the drive to itself, so Explorer, AutoPlay or an antivirus can't read the disc at the
+  same time and disturb slow retries;
+- the tray is locked, so the eject button does nothing. **Pause / cancel** unlocks it.
+
+If Windows refuses the exclusive access or the tray lock, the copy goes on without it and the log
+says why.
 
 Blu-ray images are larger than 4 GiB: the destination must be NTFS or exFAT, not FAT32.
 

@@ -216,6 +216,76 @@ namespace xISOBurn.Scsi
             return (int)(maxLen / SectorSize * SectorSize);
         }
 
+        // ------------------------------------------------------------ exclusive use during a copy
+
+        private const uint IOCTL_CDROM_EXCLUSIVE_ACCESS = 0x0002C05C;
+        private const uint IOCTL_STORAGE_MEDIA_REMOVAL = 0x002D4804;
+        private const int ExclusiveAccessLockDevice = 1, ExclusiveAccessUnlockDevice = 2;
+        private const uint CDROM_LOCK_IGNORE_VOLUME = 0x1, CDROM_NO_MEDIA_NOTIFICATIONS = 0x2;
+        private bool _exclusive, _trayLocked;
+
+        /// <summary>
+        /// For a copy or a scan: asks cdrom.sys for exclusive access, so Explorer, AutoPlay or an
+        /// antivirus cannot send their own commands to the drive in the middle of slow retries, and
+        /// locks the tray so a press of the eject button does not cut the rescue. Best effort: returns
+        /// what was done, or why not, for the log. Undone by EndExclusive (or when the handle closes).
+        /// </summary>
+        public string BeginExclusive()
+        {
+            var parts = new List<string>();
+            if (!_exclusive)
+            {
+                // CDROM_EXCLUSIVE_LOCK: CDROM_EXCLUSIVE_ACCESS { RequestType, Flags } + CallerName[64].
+                var lockReq = new byte[8 + 64];
+                Bytes.PutLE32(lockReq, 0, ExclusiveAccessLockDevice);
+                Bytes.PutLE32(lockReq, 4, CDROM_LOCK_IGNORE_VOLUME | CDROM_NO_MEDIA_NOTIFICATIONS);
+                var name = Encoding.ASCII.GetBytes("xISOBurn");
+                Buffer.BlockCopy(name, 0, lockReq, 8, name.Length);
+                int got;
+                if (DeviceIoControl(_handle, IOCTL_CDROM_EXCLUSIVE_ACCESS, lockReq, lockReq.Length, null, 0, out got, IntPtr.Zero))
+                {
+                    _exclusive = true;
+                    parts.Add("exclusive access to the drive");
+                }
+                else
+                {
+                    parts.Add("no exclusive access (" + new Win32Exception(Marshal.GetLastWin32Error()).Message + ")");
+                }
+            }
+            if (!_trayLocked)
+            {
+                int got;
+                if (DeviceIoControl(_handle, IOCTL_STORAGE_MEDIA_REMOVAL, new byte[] { 1 }, 1, null, 0, out got, IntPtr.Zero))
+                {
+                    _trayLocked = true;
+                    parts.Add("tray locked");
+                }
+                else
+                {
+                    parts.Add("tray not locked (" + new Win32Exception(Marshal.GetLastWin32Error()).Message + ")");
+                }
+            }
+            return string.Join(", ", parts);
+        }
+
+        /// <summary>Releases what BeginExclusive took. Safe to call more than once.</summary>
+        public void EndExclusive()
+        {
+            int got;
+            if (_trayLocked)
+            {
+                DeviceIoControl(_handle, IOCTL_STORAGE_MEDIA_REMOVAL, new byte[] { 0 }, 1, null, 0, out got, IntPtr.Zero);
+                _trayLocked = false;
+            }
+            if (_exclusive)
+            {
+                var unlockReq = new byte[8 + 64];
+                Bytes.PutLE32(unlockReq, 0, ExclusiveAccessUnlockDevice);
+                DeviceIoControl(_handle, IOCTL_CDROM_EXCLUSIVE_ACCESS, unlockReq, unlockReq.Length, null, 0, out got, IntPtr.Zero);
+                _exclusive = false;
+            }
+        }
+
         /// <summary>
         /// READ(10) of 'count' sectors into buf, split into transfers the adapter accepts (USB bridges
         /// often take at most 64 KiB at once). True if every sector came back.
@@ -378,6 +448,10 @@ namespace xISOBurn.Scsi
 
         public void Dispose()
         {
+            if (!_handle.IsInvalid && !_handle.IsClosed)
+            {
+                try { EndExclusive(); } catch (Exception) { }
+            }
             _handle.Dispose();
         }
     }
