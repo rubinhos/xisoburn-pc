@@ -94,6 +94,7 @@ decrypted. Sectors that can't be read stay zeros, and the `.map` file next to th
 2352 bytes per sector, to `NAME.bin` with a `NAME.cue` cue sheet, so it can be played, mounted or
 burned again. Only the first session is copied, and there is no read offset correction, so the
 checksums of audio tracks usually differ from redump.org.
+
 The `.sha256` file holds the hash of the finished image, and the `.hashes` file its size, CRC32,
 MD5, SHA-1 and SHA-256: the checksums [redump.org](http://redump.org) lists, so the copy can be
 checked against its entry. On CSS discs the image is decrypted, so it only matches a Redump entry made
