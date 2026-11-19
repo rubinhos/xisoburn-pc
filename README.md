@@ -87,9 +87,10 @@ The `.sha256` file holds the hash of the finished image.
 Everything builds on GitHub Actions ([.github/workflows/build.yml](.github/workflows/build.yml)):
 `dotnet publish` makes a single self-contained `.exe` for `win-x64` and `win-arm64`. Pull requests
 are built too, and every push to `master` creates a release. To build on your own PC you need the
-.NET 10 SDK:
+.NET 10 SDK and the submodule:
 
 ```
+git clone --recurse-submodules https://github.com/rubinhos/xisoburn-pc.git
 dotnet publish src/xISOBurn/xISOBurn.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ```
 
@@ -97,14 +98,13 @@ dotnet publish src/xISOBurn/xISOBurn.csproj -c Release -r win-x64 --self-contain
 
 | Folder | Contents |
 |--------|----------|
-| `src/xISOBurn/Scsi/` | Drive access: `CreateFile` + `IOCTL_SCSI_PASS_THROUGH`, drive list, SCSI commands |
-| `src/xISOBurn/Core/` | Disc detection, multi-pass copy, sector map, settings, copy folder, disc scan |
-| `src/xISOBurn/Css/` | CSS: C# port of libdvdcss |
-| `src/xISOBurn/Bluray/` | AACS and BD+: C# ports of libaacs and libbdplus, UDF reader |
-| `src/xISOBurn/*.cs` | The Windows window, the settings and the Blu-ray keys dialogs |
+| `xisoburn/` | Git submodule: the [xisoburn](https://github.com/rubinhos/xisoburn) repository. The app compiles its `engine/` folder (disc detection, multi-pass copy, sector map, disc scan, CSS, AACS and BD+) |
+| `src/xISOBurn/Scsi/` | Drive access: `CreateFile` + `IOCTL_SCSI_PASS_THROUGH`, drive list |
+| `src/xISOBurn/Core/` | Settings and copy folder |
+| `src/xISOBurn/*.cs` | The Windows window, the settings and the Blu-ray keys dialogs, `Platform.cs` |
 
-The engine (`Scsi`, `Core`, `Css`, `Bluray`, `Util`) comes from the Xbox app. Only the drive access,
-the copy folder, the settings file and the hashing differ, because those used UWP APIs there.
+The Xbox app and this one compile the same engine, so a fix there reaches both. To take a new engine
+version: `git submodule update --remote xisoburn`, then commit the new pointer.
 
 ## License
 

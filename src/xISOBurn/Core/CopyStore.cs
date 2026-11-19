@@ -26,8 +26,8 @@ namespace xISOBurn.Core
         public string Folder { get { return _folder; } }
         public string Description { get { return _folder; } }
 
-        /// <summary>The destination's file system is FAT/FAT32 (no files of 4 GiB or more).</summary>
-        public bool IsFat
+        /// <summary>The destination is FAT/FAT32 (no files of 4 GiB or more).</summary>
+        public bool LimitedTo4GiB
         {
             get
             {
@@ -50,6 +50,9 @@ namespace xISOBurn.Core
         private string P(string name) { return Path.Combine(_folder, name); }
 
         public string PathOf(string name) { return P(name); }
+
+        /// <summary>How a file of this store is shown in the log: its full path.</summary>
+        public string DisplayPath(string name) { return P(name); }
 
         /// <summary>Opens or creates a file for reading and writing; others may read it at the same time.</summary>
         public Task<Stream> OpenWriteAsync(string name)

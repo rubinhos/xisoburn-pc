@@ -27,6 +27,8 @@ jobs:
       VERSION: 1.0.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          submodules: true   # xisoburn/engine: the copy engine shared with the Xbox app
 
       - uses: actions/setup-dotnet@v6
         with:

@@ -22,5 +22,16 @@
     <Copyright>GPL-2.0-or-later</Copyright>
     <!-- The ported engine keeps its original style; do not drown the build in style warnings. -->
     <NoWarn>$(NoWarn);CA1416;SYSLIB0021;SYSLIB0022;SYSLIB0023</NoWarn>
+    <EngineDir>$(MSBuildThisFileDirectory)..\..\xisoburn\engine\</EngineDir>
   </PropertyGroup>
+  <!--
+    The copy engine is shared with the Xbox app: it lives in rubinhos/xisoburn (engine/), included here
+    as the git submodule "xisoburn". Clone with: git clone --recurse-submodules ...
+  -->
+  <ItemGroup>
+    <Compile Include="$(EngineDir)**\*.cs" Link="Engine\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <Target Name="CheckEngine" BeforeTargets="BeforeBuild" Condition="!Exists('$(EngineDir)Core\RescueJob.cs')">
+    <Error Text="The shared engine is missing ($(EngineDir)). Run: git submodule update --init" />
+  </Target>
 </Project>
