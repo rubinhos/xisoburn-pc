@@ -673,7 +673,7 @@ namespace xISOBurn
             var cfg = CopyConfig.Load(_folder, out msg);
             using (var d = new FolderBrowserDialog
             {
-                Description = "Folder for the copies (.iso, .map, .sha256). Blu-ray images need NTFS or exFAT (files over 4 GiB).",
+                Description = "Folder for the copies (.iso or .bin/.cue, .map, .sha256, .hashes). Blu-ray images need NTFS or exFAT (files over 4 GiB).",
                 UseDescriptionForTitle = true,
                 ShowNewFolderButton = true,
                 SelectedPath = CopyStore.Resolve(cfg.OutputFolder),
