@@ -26,9 +26,9 @@ jobs:
       PROJECT: src/xISOBurn/xISOBurn.csproj
       VERSION: 1.0.${{ github.run_number }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -46,7 +46,7 @@ jobs:
           Copy-Item $exe "dist/xISOBurn-$env:VERSION-${{ matrix.rid }}.exe"
           Get-ChildItem dist | ForEach-Object { "{0,12:N0}  {1}" -f $_.Length, $_.Name }
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: xISOBurn-${{ env.VERSION }}-${{ matrix.rid }}
           path: dist/
@@ -62,7 +62,7 @@ jobs:
     env:
       VERSION: 1.0.${{ github.run_number }}
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
