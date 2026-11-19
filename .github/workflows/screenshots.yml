@@ -1,9 +1,12 @@
 # Screenshots for the README: builds the app, runs it with --screenshots on the runner's desktop (the
-# real windows, without an optical drive) and uploads the PNG files as an artifact. Started by hand.
+# real windows, without an optical drive) and uploads the PNG files as an artifact. Started by hand,
+# or by a pull request that changes this file or Program.cs.
 
 name: screenshots
 
 on:
+  pull_request:
+    paths: [".github/workflows/screenshots.yml", "src/xISOBurn/Program.cs"]
   workflow_dispatch:
 
 permissions:
