@@ -1,0 +1,51 @@
+# Screenshots for the README: builds the app, runs it with --screenshots on the runner's desktop (the
+# real windows, without an optical drive) and uploads the PNG files as an artifact. Started by hand,
+# or by a pull request that changes this file or Program.cs.
+
+name: screenshots
+
+on:
+  pull_request:
+    paths: [".github/workflows/screenshots.yml", "src/xISOBurn/Program.cs"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screenshots:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The version of the latest release, so the log line in the screenshot matches what people download.
+          $tag = gh release view --repo $env:GITHUB_REPOSITORY --json tagName -q .tagName
+          $version = if ($tag) { $tag.TrimStart('v') } else { "1.0.0" }
+          dotnet publish src/xISOBurn/xISOBurn.csproj -c Release -r win-x64 --self-contained true -p:Version=$version -o out
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Take the screenshots
+        shell: pwsh
+        run: |
+          $dir = Join-Path $env:GITHUB_WORKSPACE "shots"
+          $p = Start-Process -FilePath "out\xISOBurn.exe" -ArgumentList "--screenshots", "`"$dir`"" -PassThru
+          if (-not $p.WaitForExit(120000)) { $p.Kill(); throw "the app did not finish in 2 minutes" }
+          Get-ChildItem $dir | ForEach-Object { "{0,10:N0}  {1}" -f $_.Length, $_.Name }
+          if ((Get-ChildItem $dir -Filter *.png).Count -lt 3) { throw "missing screenshots" }
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: screenshots
+          path: shots/
+          if-no-files-found: error

@@ -22,17 +22,45 @@ engine as the Xbox app, with a Windows window in place of the console screen and
   open it without asking for keys.
 - **External drives:** USB drives are listed together with internal ones and the list refreshes when
   a drive is plugged in. When the USB connection limits how much can be read at once, the app reads
-  in smaller blocks by itself.
+  in smaller blocks by itself. During a copy the app has the drive to itself and the tray is locked.
+- **CDs:** data CDs give an ISO; audio and mixed-mode CDs are copied raw to `.bin` + `.cue`.
+- **Checksums:** besides the SHA-256, a `.hashes` file with the size, CRC32, MD5 and SHA-1 that
+  [redump.org](http://redump.org) lists, to check a copy against its entry.
+
+![xISOBurn for Windows](docs/images/pc-main.png)
+
+## Supported discs
+
+| Disc | Image | Tested on the PC |
+|------|-------|------------------|
+| Data DVD, DVD-Video without protection | `.iso` | Same engine as the Xbox app, tested there |
+| CSS-protected DVD-Video | `.iso`, video decrypted | Same engine as the Xbox app, tested there |
+| DVD-Audio (CPPM) | `.iso`, audio decrypted | Not yet |
+| Blu-ray, AACS 1 / BD+ (experimental) | `.iso`, streams decrypted with your key files | Yes, a Blu-ray in an external USB drive |
+| Blu-ray, AACS 2 (UHD) | `.iso`, only with a VUK or unit keys in `KEYDB.cfg` | Not yet |
+| Data CD-ROM | `.iso` | Tested on the Xbox ([xisoburn#7](https://github.com/rubinhos/xisoburn/issues/7)) |
+| Audio CD, mixed-mode CD | `.bin` + `.cue` | Not yet |
+
+If you try one that says "Not yet", an issue with the log (`%LOCALAPPDATA%\xISOBurn`) is very welcome.
 
 ## Download and run
 
 1. Open the repository's **Releases** page. Every build of `master` is published there.
 2. Download `xISOBurn-<version>-win-x64.exe` (Intel / AMD PCs) or `-win-arm64.exe` (Windows on ARM).
+   `SHA256SUMS.txt` has the checksums of both.
 3. Run it. You don't need to install anything: the `.exe` includes .NET.
 
-The executable is not code-signed, so SmartScreen may warn the first time: choose **More info > Run
-anyway**. If Windows refuses SCSI commands to the drive for a standard user, the app offers to restart
-as administrator.
+The executable is not code-signed yet, so Windows may stop it:
+
+- **SmartScreen** ("Windows protected your PC"): choose **More info > Run anyway**.
+- **Smart App Control** (Windows 11; "Smart App Control blocked an app that may be unsafe"): it has no
+  "run anyway", and unblocking the file in its properties does not help. It only allows signed or
+  well-known programs. Until the releases are signed, the only way is to turn it off in **Windows
+  Security > App & browser control > Smart App Control settings**. On older Windows 11 builds turning
+  it off cannot be undone without reinstalling Windows; recent builds let you turn it on again.
+
+If Windows refuses SCSI commands to the drive for a standard user, the app offers to restart as
+administrator.
 
 ## How to use
 
@@ -64,19 +92,23 @@ Blu-ray images are larger than 4 GiB: the destination must be NTFS or exFAT, not
 
 ## Settings
 
+| Settings | Blu-ray keys |
+|----------|--------------|
+| ![Settings](docs/images/pc-settings.png) | ![Blu-ray keys](docs/images/pc-bluray-keys.png) |
+
 | Setting | Default | What it does |
 |---------|---------|--------------|
 | File name | empty | Name of the ISO. Empty uses the disc's volume name |
 | Destination | empty | Folder for the copies. Empty uses `Documents\xISOBurn` |
 | Write the image | on | Off only tests the drive and builds the map, without saving the ISO |
-| Decrypt CSS | on | Off copies DVD-Video as it is on the disc, still encrypted |
+| Decrypt CSS and CPPM | on | Off copies DVD-Video and DVD-Audio as they are on the disc, still encrypted |
 | Decrypt Blu-ray | on | Off copies the Blu-ray streams as they are on the disc, still encrypted |
 | Mark the image as decrypted | off | Renames `AACS` in the image so libbluray players open it without keys |
 | Sectors per read | 32 | How much is read at once in the good areas (lowered automatically to what the drive's connection accepts) |
 | Timeout per command | 20 s | How long to wait for the drive on each read |
 | Skip ahead over areas with many errors | on | Copies the easy parts first and comes back to the damaged ones |
 | Retry passes | 2 | Extra passes over the sectors that still fail |
-| Drive speed for retries | DVD 1x | Reading slowly often recovers scratched sectors |
+| Drive speed for retries | DVD 1x | Reading slowly often recovers scratched sectors (DVD and BD speeds to choose from) |
 | Drive's own retries | do not change | Experimental. Lower values make failing reads give up sooner |
 | First sector / Sectors | 0 / 0 | Copies only part of the disc, for tests. 0 sectors means to the end |
 
@@ -111,6 +143,9 @@ are built too, and every push to `master` creates a release. To build on your ow
 git clone --recurse-submodules https://github.com/rubinhos/xisoburn-pc.git
 dotnet publish src/xISOBurn/xISOBurn.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ```
+
+The screenshots in `docs/images/` come from the **screenshots** workflow (Actions tab → Run workflow):
+it runs the app with `--screenshots <folder>`, which saves the real windows as PNG files and exits.
 
 ## Repository layout
 
