@@ -26,7 +26,7 @@
   </PropertyGroup>
   <!--
     The copy engine is shared with the Xbox app: it lives in rubinhos/xisoburn (engine/), included here
-    as the git submodule "xisoburn". Clone with: git clone --recurse-submodules ...
+    as the git submodule "xisoburn" (clone recursively, or run "git submodule update init").
   -->
   <ItemGroup>
     <Compile Include="$(EngineDir)**\*.cs" Link="Engine\%(RecursiveDir)%(Filename)%(Extension)" />
