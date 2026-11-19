@@ -147,9 +147,6 @@ dotnet publish src/xISOBurn/xISOBurn.csproj -c Release -r win-x64 --self-contain
 The screenshots in `docs/images/` come from the **screenshots** workflow (Actions tab → Run workflow):
 it runs the app with `--screenshots <folder>`, which saves the real windows as PNG files and exits.
 
-```
-```
-
 ## Repository layout
 
 | Folder | Contents |
