@@ -1,0 +1,86 @@
+# Builds xISOBurn for Windows as one self-contained .exe per architecture (no .NET install needed on
+# the PC). Everything runs on the GitHub runner. Every push to master becomes a GitHub release
+# (tag v1.0.<run number>) with the executables attached.
+
+name: build
+
+on:
+  push:
+    branches: [master]
+    paths-ignore: ['**.md', 'docs/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Windows ${{ matrix.rid }}
+    runs-on: windows-2025
+    strategy:
+      matrix:
+        rid: [win-x64, win-arm64]
+    env:
+      PROJECT: src/xISOBurn/xISOBurn.csproj
+      VERSION: 1.0.${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish (single self-contained .exe)
+        shell: pwsh
+        run: |
+          dotnet publish $env:PROJECT -c Release -r ${{ matrix.rid }} --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:EnableCompressionInSingleFile=true -p:DebugType=none `
+            -p:Version=$env:VERSION -o out/${{ matrix.rid }}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $exe = "out/${{ matrix.rid }}/xISOBurn.exe"
+          if (-not (Test-Path $exe)) { throw "xISOBurn.exe not found" }
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item $exe "dist/xISOBurn-$env:VERSION-${{ matrix.rid }}.exe"
+          Get-ChildItem dist | ForEach-Object { "{0,12:N0}  {1}" -f $_.Length, $_.Name }
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: xISOBurn-${{ env.VERSION }}-${{ matrix.rid }}
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    name: GitHub release
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: 1.0.${{ github.run_number }}
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -l dist
+          (cd dist && sha256sum *.exe > SHA256SUMS.txt)
+          cat > notes.md <<NOTES
+          Download the \`.exe\` for your PC and run it, no installation needed:
+          - \`xISOBurn-$VERSION-win-x64.exe\`: most PCs (Intel / AMD).
+          - \`xISOBurn-$VERSION-win-arm64.exe\`: Windows on ARM (Snapdragon).
+
+          The executable is not code-signed, so Windows SmartScreen may warn the first time: choose
+          **More info > Run anyway**. If Windows refuses access to the drive, xISOBurn offers to restart as
+          administrator.
+          NOTES
+          gh release create "v$VERSION" dist/*.exe dist/SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "xISOBurn for Windows $VERSION" --notes-file notes.md --generate-notes

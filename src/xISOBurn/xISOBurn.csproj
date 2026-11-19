@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    xISOBurn for Windows: the xISOBurn copy engine (multi-pass rescue, CSS, AACS/BD+) on a PC, with an
+    internal or external (USB) optical drive. WinForms, .NET 10. Built and published by
+    .github/workflows/build.yml as a single self-contained .exe (no .NET install needed).
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>xISOBurn</RootNamespace>
+    <AssemblyName>xISOBurn</AssemblyName>
+    <ApplicationIcon>Assets\xISOBurn.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <Version>1.0.0</Version>
+    <Product>xISOBurn</Product>
+    <Description>Copies CDs, DVDs and Blu-ray discs to ISO images, sector by sector, with damaged-disc rescue.</Description>
+    <Copyright>GPL-2.0-or-later</Copyright>
+    <!-- The ported engine keeps its original style; do not drown the build in style warnings. -->
+    <NoWarn>$(NoWarn);CA1416;SYSLIB0021;SYSLIB0022;SYSLIB0023</NoWarn>
+  </PropertyGroup>
+</Project>

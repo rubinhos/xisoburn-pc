@@ -1,0 +1,10 @@
+bin/
+obj/
+*.user
+.vs/
+out/
+publish/
+*.pfx
+*.iso
+*.bin
+log/
