@@ -37,7 +37,7 @@ as administrator.
 | In the window | What it is |
 |---------------|------------|
 | **Drive** | The optical drive to use, with its model and bus (USB, SATA...). **Refresh** lists the drives again |
-| **Copies go to** | The folder for the `.iso`, `.map` and `.sha256` files (default `Documents\xISOBurn`). **Change...** picks another folder, **Open folder** shows it in Explorer |
+| **Copies go to** | The folder for the `.iso`, `.map`, `.sha256` and `.hashes` files (default `Documents\xISOBurn`). **Change...** picks another folder, **Open folder** shows it in Explorer |
 | **Detect disc** | Reads the disc type, size, volume name and protection, and shows them in **Disc** |
 | **Copy / resume** | Starts the copy, or continues a paused or unfinished one from where it stopped |
 | **Pause / cancel** | Pauses the copy. Nothing is lost: **Copy / resume** continues later, even after the app was closed |
@@ -80,7 +80,10 @@ details are described in the Xbox repository:
 
 A raw image, 2048 bytes per sector, the same as a plain ISO. On CSS discs the video sectors are
 decrypted. Sectors that can't be read stay zeros, and the `.map` file next to the image lists them.
-The `.sha256` file holds the hash of the finished image.
+The `.sha256` file holds the hash of the finished image, and the `.hashes` file its size, CRC32,
+MD5, SHA-1 and SHA-256: the checksums [redump.org](http://redump.org) lists, so the copy can be
+checked against its entry. On CSS discs the image is decrypted, so it only matches a Redump entry made
+from decrypted data; turn off **Decrypt CSS** to keep the sectors as on the disc.
 
 ## Building
 
