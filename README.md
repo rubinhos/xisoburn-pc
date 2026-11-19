@@ -12,7 +12,9 @@ engine as the Xbox app, with a Windows window in place of the console screen and
   readable data is copied first, then the damaged areas. A map records every sector, and the
   SHA-256 is computed when nothing is left to read.
 - **CSS-protected DVD-Video:** the app authenticates with the drive and decrypts the video while
-  copying, so the ISO plays in any player. The disc's region has to match the drive's region.
+  copying, so the ISO plays in any player. The disc's region has to match the drive's region
+  (unless the drive is region-free: then the keys are recovered from the video). DVD-Audio discs
+  (CPPM) are decrypted the same way.
 - **AACS / BD+ Blu-ray (experimental):** with the key files you add under **Blu-ray keys**
   (`KEYDB.cfg`, and for BD+ the libbdplus `vm0` player files or cached conversion tables), the app
   decrypts the `.m2ts` streams while copying and applies the BD+ fixups. The app ships no keys.
