@@ -80,7 +80,8 @@ administrator.
 
 Usually you only need **Detect disc** and then **Copy / resume**. While a copy or a scan is running:
 
-- the PC does not go to sleep;
+- the PC does not go to sleep, and when the copy finishes or stops you get a Windows notification
+  and a sound (Settings can turn that off);
 - xISOBurn has the drive to itself, so Explorer, AutoPlay or an antivirus can't read the disc at the
   same time and disturb slow retries;
 - the tray is locked, so the eject button does nothing. **Pause / cancel** unlocks it.
@@ -104,6 +105,7 @@ Blu-ray images are larger than 4 GiB: the destination must be NTFS or exFAT, not
 | Decrypt CSS and CPPM | on | Off copies DVD-Video and DVD-Audio as they are on the disc, still encrypted |
 | Decrypt Blu-ray | on | Off copies the Blu-ray streams as they are on the disc, still encrypted |
 | Mark the image as decrypted | off | Renames `AACS` in the image so libbluray players open it without keys |
+| Notify me when a copy finishes or stops | on | A Windows notification, a sound and a flashing taskbar button. Clicking the notification brings xISOBurn to the front. Pausing it yourself gives no notification |
 | Sectors per read | 32 | How much is read at once in the good areas (lowered automatically to what the drive's connection accepts) |
 | Timeout per command | 20 s | How long to wait for the drive on each read |
 | Skip ahead over areas with many errors | on | Copies the easy parts first and comes back to the damaged ones |
