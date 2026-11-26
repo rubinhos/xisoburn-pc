@@ -25,6 +25,7 @@ namespace xISOBurn
         private readonly CheckBox _decryptBluray = new CheckBox { Text = "Decrypt Blu-ray (AACS / BD+, with the key files)", AutoSize = true };
         private readonly CheckBox _markDecrypted = new CheckBox { Text = "Mark the Blu-ray image as decrypted (for VLC and Kodi)", AutoSize = true };
         private readonly CheckBox _notify = new CheckBox { Text = "Notify me when a copy finishes or stops (Windows notification and sound)", AutoSize = true };
+        private readonly CheckBox _cdLookup = new CheckBox { Text = "Audio CDs: look up the album and track names on MusicBrainz (internet) when the disc has no CD-TEXT", AutoSize = true };
         private readonly ComboBox _sectorsPerRead = Combo();
         private readonly NumericUpDown _timeout = new NumericUpDown { Minimum = 5, Maximum = 120, Width = 80 };
         private readonly CheckBox _skip = new CheckBox { Text = "Skip ahead over areas with many errors", AutoSize = true };
@@ -93,6 +94,7 @@ namespace xISOBurn
             wide(_decryptCss);
             wide(_decryptBluray);
             wide(_markDecrypted);
+            wide(_cdLookup);
             wide(_notify);
             row("Sectors per read", _sectorsPerRead);
             row("Timeout per command (s)", _timeout);
@@ -122,6 +124,7 @@ namespace xISOBurn
             _decryptBluray.Checked = current.DecryptBluray;
             _markDecrypted.Checked = current.MarkBlurayDecrypted;
             _notify.Checked = current.NotifyWhenDone;
+            _cdLookup.Checked = current.CdLookupOnline;
             Fill(_sectorsPerRead, current.SectorsPerRead.ToString(),
                  "16 (32 KiB)", "16", "32 (64 KiB, default)", "32", "48 (96 KiB)", "48", "64 (128 KiB)", "64");
             _timeout.Value = Math.Max(5, Math.Min(120, current.TimeoutSeconds));
@@ -147,6 +150,7 @@ namespace xISOBurn
                 { "DecryptBluray", _decryptBluray.Checked ? "true" : "false" },
                 { "MarkBlurayDecrypted", _markDecrypted.Checked ? "true" : "false" },
                 { "NotifyWhenDone", _notify.Checked ? "true" : "false" },
+                { "CdLookupOnline", _cdLookup.Checked ? "true" : "false" },
                 { "SectorsPerRead", TagOf(_sectorsPerRead) },
                 { "TimeoutSeconds", ((int)_timeout.Value).ToString() },
                 { "SkipOnErrors", _skip.Checked ? "true" : "false" },
