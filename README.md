@@ -88,7 +88,9 @@ Usually you only need **Detect disc** and then **Copy / resume**. While a copy o
   and a sound (Settings can turn that off);
 - xISOBurn has the drive to itself, so Explorer, AutoPlay or an antivirus can't read the disc at the
   same time and disturb slow retries;
-- the tray is locked, so the eject button does nothing. **Pause / cancel** unlocks it.
+- the tray is locked, so the eject button does nothing. **Pause / cancel** unlocks it;
+- when the copy is complete (every sector read), the app ejects the disc. With unreadable sectors
+  left it stays in, for **Retry failed** (Settings can turn the ejecting off).
 
 If Windows refuses the exclusive access or the tray lock, the copy goes on without it and the log
 says why.
@@ -110,6 +112,7 @@ Blu-ray images are larger than 4 GiB: the destination must be NTFS or exFAT, not
 | Decrypt Blu-ray | on | Off copies the Blu-ray streams as they are on the disc, still encrypted |
 | Mark the image as decrypted | off | Renames `AACS` in the image so libbluray players open it without keys |
 | Look up CD names on MusicBrainz | on | Audio CDs without CD-TEXT: asks MusicBrainz for the album and track names (sends only the disc ID). Off = no internet access |
+| Eject the disc when the copy is complete | on | Ejects the disc once every sector is read and the checksums are written. With unreadable sectors left, the disc stays in for **Retry failed** |
 | Notify me when a copy finishes or stops | on | A Windows notification, a sound and a flashing taskbar button. Clicking the notification brings xISOBurn to the front. Pausing it yourself gives no notification |
 | Sectors per read | 32 | How much is read at once in the good areas (lowered automatically to what the drive's connection accepts) |
 | Timeout per command | 20 s | How long to wait for the drive on each read |

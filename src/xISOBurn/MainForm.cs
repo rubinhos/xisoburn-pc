@@ -547,6 +547,8 @@ namespace xISOBurn
                     status += " Blu-ray: not decrypted (no usable keys; see the log and \"Blu-ray keys\").";
                 if (result.RefusedThisRun >= RescueJob.RefusalNoticeAfter)
                     status += " " + RefusalMessage(result.RefusedThisRun);
+                if (result.Ejected)
+                    status += " The disc was ejected.";
                 _statusText.Text = status;
                 if (cfg.NotifyWhenDone) NotifyRunEnded(result, extraRetryPass, RescueJob.BaseNameFor(cfg, _probe));
             }
@@ -626,7 +628,8 @@ namespace xISOBurn
                        failed > 0 ? ToolTipIcon.Warning : ToolTipIcon.Info);
             else if (result.Finished && failed == 0)
                 Notify("Copy finished", name + ": the whole disc was read" +
-                       (result.Hashes != null ? "; the checksums are in the .hashes file." : "."), ToolTipIcon.Info);
+                       (result.Hashes != null ? "; the checksums are in the .hashes file." : ".") +
+                       (result.Ejected ? " The disc was ejected." : ""), ToolTipIcon.Info);
             else if (result.Finished)
                 Notify("Copy finished with unreadable sectors", name + ": " + failed.ToString("N0") +
                        " sector(s) could not be read. \"Retry failed\" tries them once more.", ToolTipIcon.Warning);

@@ -216,6 +216,27 @@ namespace xISOBurn.Scsi
             return (int)(maxLen / SectorSize * SectorSize);
         }
 
+        // ------------------------------------------------------------ eject
+
+        private const uint IOCTL_STORAGE_EJECT_MEDIA = 0x002D4808;
+
+        /// <summary>
+        /// Ejects the disc (part of what the shared engine expects of a drive): releases the exclusive
+        /// access and the tray lock of the copy, then asks Windows (IOCTL_STORAGE_EJECT_MEDIA), and if
+        /// that fails sends START STOP UNIT with LoEj. Returns null when the disc went out, or why not.
+        /// </summary>
+        public async Task<string> EjectAsync()
+        {
+            EndExclusive();
+            int got;
+            if (DeviceIoControl(_handle, IOCTL_STORAGE_EJECT_MEDIA, null, 0, null, 0, out got, IntPtr.Zero))
+                return null;
+            string windows = new Win32Exception(Marshal.GetLastWin32Error()).Message;
+            await SendAsync(ScsiCommands.PreventAllowMediumRemoval(false), 0, null, 0, 10);
+            var r = await SendAsync(ScsiCommands.Eject(), 0, null, 0, 30);
+            return r.Success ? null : "Windows: " + windows + "; SCSI: " + r.Describe();
+        }
+
         // ------------------------------------------------------------ exclusive use during a copy
 
         private const uint IOCTL_CDROM_EXCLUSIVE_ACCESS = 0x0002C05C;
