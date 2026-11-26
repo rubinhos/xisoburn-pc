@@ -129,10 +129,15 @@ namespace xISOBurn.Core
             await ReplaceAsync(tmp, name);
         }
 
-        /// <summary>The store for a setting; creates the folder, or throws with a readable message.</summary>
-        public static Task<CopyStore> OpenAsync(string outputFolder, string appFolder)
+        /// <summary>
+        /// The store for a setting; creates the folder, or throws with a readable message. With a
+        /// 'subfolder' (an audio CD: "Artist - Album", from the engine) the copy goes into that folder of
+        /// the destination, so its .bin, .cue, .map and checksums stay together.
+        /// </summary>
+        public static Task<CopyStore> OpenAsync(string outputFolder, string appFolder, string subfolder = null)
         {
             string folder = Resolve(outputFolder);
+            if (!string.IsNullOrWhiteSpace(subfolder)) folder = Path.Combine(folder, subfolder);
             try
             {
                 Directory.CreateDirectory(folder);

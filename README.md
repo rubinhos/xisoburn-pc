@@ -128,7 +128,18 @@ decrypted. Sectors that can't be read stay zeros, and the `.map` file next to th
 
 **CDs:** a data CD is copied as an ISO. A CD with audio tracks (music, or mixed mode) is copied raw,
 2352 bytes per sector, to `NAME.bin` with a `NAME.cue` cue sheet, so it can be played, mounted or
-burned again. The image is named "Artist - Album" and the cue sheet lists the track titles and
+burned again. Its files (`.bin`, `.cue`, `.map` and the checksums) go into a folder of their own
+inside the destination, named like the image:
+
+```
+Documents\xISOBurn\
+    Artist - Album\
+        Artist - Album.bin
+        Artist - Album.cue
+        Artist - Album.map, .sha256, .hashes
+```
+
+The image is named "Artist - Album" and the cue sheet lists the track titles and
 performers, from the disc's CD-TEXT or from MusicBrainz (only the disc ID is sent; Settings can turn
 that off); a disc named once keeps its name in `%LOCALAPPDATA%\xISOBurn\cdinfo`. Only the first
 session is copied, and there is no read offset correction, so the checksums of audio tracks
