@@ -23,7 +23,8 @@ engine as the Xbox app, with a Windows window in place of the console screen and
 - **External drives:** USB drives are listed together with internal ones and the list refreshes when
   a drive is plugged in. When the USB connection limits how much can be read at once, the app reads
   in smaller blocks by itself. During a copy the app has the drive to itself and the tray is locked.
-- **CDs:** data CDs give an ISO; audio and mixed-mode CDs are copied raw to `.bin` + `.cue`.
+- **CDs:** data CDs give an ISO; audio and mixed-mode CDs are copied raw to `.bin` + `.cue`, named
+  "Artist - Album" with the track titles in the cue sheet, from the disc's CD-TEXT or from MusicBrainz.
 - **Checksums:** besides the SHA-256, a `.hashes` file with the size, CRC32, MD5 and SHA-1 that
   [redump.org](http://redump.org) lists, to check a copy against its entry.
 
@@ -105,6 +106,7 @@ Blu-ray images are larger than 4 GiB: the destination must be NTFS or exFAT, not
 | Decrypt CSS and CPPM | on | Off copies DVD-Video and DVD-Audio as they are on the disc, still encrypted |
 | Decrypt Blu-ray | on | Off copies the Blu-ray streams as they are on the disc, still encrypted |
 | Mark the image as decrypted | off | Renames `AACS` in the image so libbluray players open it without keys |
+| Look up CD names on MusicBrainz | on | Audio CDs without CD-TEXT: asks MusicBrainz for the album and track names (sends only the disc ID). Off = no internet access |
 | Notify me when a copy finishes or stops | on | A Windows notification, a sound and a flashing taskbar button. Clicking the notification brings xISOBurn to the front. Pausing it yourself gives no notification |
 | Sectors per read | 32 | How much is read at once in the good areas (lowered automatically to what the drive's connection accepts) |
 | Timeout per command | 20 s | How long to wait for the drive on each read |
@@ -126,8 +128,11 @@ decrypted. Sectors that can't be read stay zeros, and the `.map` file next to th
 
 **CDs:** a data CD is copied as an ISO. A CD with audio tracks (music, or mixed mode) is copied raw,
 2352 bytes per sector, to `NAME.bin` with a `NAME.cue` cue sheet, so it can be played, mounted or
-burned again. Only the first session is copied, and there is no read offset correction, so the
-checksums of audio tracks usually differ from redump.org.
+burned again. The image is named "Artist - Album" and the cue sheet lists the track titles and
+performers, from the disc's CD-TEXT or from MusicBrainz (only the disc ID is sent; Settings can turn
+that off); a disc named once keeps its name in `%LOCALAPPDATA%\xISOBurn\cdinfo`. Only the first
+session is copied, and there is no read offset correction, so the checksums of audio tracks
+usually differ from redump.org.
 
 The `.sha256` file holds the hash of the finished image, and the `.hashes` file its size, CRC32,
 MD5, SHA-1 and SHA-256: the checksums [redump.org](http://redump.org) lists, so the copy can be

@@ -384,7 +384,13 @@ namespace xISOBurn
         {
             if (!await EnsureDriveAsync()) return false;
             var drive = _drive;
-            _probe = await Task.Run(() => DiscProbe.RunAsync(drive, timeout, _log));
+            string cfgMsg;
+            var lookup = new CdLookup
+            {
+                CacheFolder = Path.Combine(_folder, "cdinfo"),
+                Online = CopyConfig.Load(_folder, out cfgMsg).CdLookupOnline,
+            };
+            _probe = await Task.Run(() => DiscProbe.RunAsync(drive, timeout, _log, lookup));
             if (!_probe.Ready && _probe.NotReadyReason.Contains("IOCTL"))
                 CloseDrive(); // the handle may have gone stale (USB drive unplugged); reopen next time
             await CheckPreviousRescueAsync();

@@ -59,6 +59,8 @@ namespace xISOBurn.Core
         public string DriveId = "";
         /// <summary>A Windows notification, a sound and a flashing taskbar button when a copy finishes or stops.</summary>
         public bool NotifyWhenDone = true;
+        /// <summary>Audio CDs: look the album and track names up on MusicBrainz when the CD-TEXT does not have them.</summary>
+        public bool CdLookupOnline = true;
 
         /// <summary>
         /// Applies the settings form on top of 'current'. Keys are the config.json names; a boolean is on
@@ -80,6 +82,7 @@ namespace xISOBurn.Core
             cfg.SkipOnErrors = flag("SkipOnErrors");
             cfg.OutputName = get("OutputName");
             cfg.NotifyWhenDone = flag("NotifyWhenDone");
+            cfg.CdLookupOnline = flag("CdLookupOnline");
 
             int timeout, passes, spr, speed, driveRetries;
             long start, limit;
@@ -156,6 +159,7 @@ namespace xISOBurn.Core
                     cfg.OutputFolder = str("OutputFolder", cfg.OutputFolder);
                     cfg.DriveId = str("DriveId", cfg.DriveId);
                     cfg.NotifyWhenDone = boo("NotifyWhenDone", cfg.NotifyWhenDone);
+                    cfg.CdLookupOnline = boo("CdLookupOnline", cfg.CdLookupOnline);
                 }
                 catch (Exception ex)
                 {
@@ -211,7 +215,8 @@ namespace xISOBurn.Core
             sb.Append("  \"MarkBlurayDecrypted\": ").Append(MarkBlurayDecrypted ? "true" : "false").Append(",\n");
             sb.Append("  \"OutputFolder\": ").Append(Q(OutputFolder)).Append(",\n");
             sb.Append("  \"DriveId\": ").Append(Q(DriveId)).Append(",\n");
-            sb.Append("  \"NotifyWhenDone\": ").Append(NotifyWhenDone ? "true" : "false").Append("\n");
+            sb.Append("  \"NotifyWhenDone\": ").Append(NotifyWhenDone ? "true" : "false").Append(",\n");
+            sb.Append("  \"CdLookupOnline\": ").Append(CdLookupOnline ? "true" : "false").Append("\n");
             sb.Append("}\n");
             Directory.CreateDirectory(folder);
             File.WriteAllText(Path.Combine(folder, FileName), sb.ToString(), new UTF8Encoding(false));
@@ -228,7 +233,8 @@ namespace xISOBurn.Core
                    " | decrypt CSS: " + (DecryptCss ? "yes" : "no") +
                    " | decrypt Blu-ray: " + (DecryptBluray ? (MarkBlurayDecrypted ? "yes, marked" : "yes") : "no") +
                    " | destination: " + CopyStore.Resolve(OutputFolder) +
-                   " | notify when done: " + (NotifyWhenDone ? "yes" : "no");
+                   " | notify when done: " + (NotifyWhenDone ? "yes" : "no") +
+                   " | CD names online: " + (CdLookupOnline ? "yes" : "no");
         }
     }
 }
