@@ -5,8 +5,9 @@
 # xISOBurn for Windows
 
 The Windows version of [xISOBurn](https://github.com/rubinhos/xisoburn). It copies the disc in a PC
-optical drive, internal or external (USB), to an ISO image, sector by sector. It uses the same copy
-engine as the Xbox app, with a Windows window in place of the console screen and the web page.
+optical drive, internal or external (USB), to an image, sector by sector: DVD, Blu-ray or CD. It uses
+the same copy engine as the Xbox app, with a Windows window in place of the console screen and the web
+page.
 
 - **Damaged discs:** the copy runs in multiple resumable passes, in the style of ddrescue. The
   readable data is copied first, then the damaged areas. A map records every sector, and the
@@ -27,6 +28,8 @@ engine as the Xbox app, with a Windows window in place of the console screen and
   "Artist - Album" with the track titles in the cue sheet, from the disc's CD-TEXT or from MusicBrainz.
 - **Checksums:** besides the SHA-256, a `.hashes` file with the size, CRC32, MD5 and SHA-1 that
   [redump.org](http://redump.org) lists, to check a copy against its entry.
+- **Notification:** when a copy finishes or stops, a Windows notification, a sound and a flashing
+  taskbar button, so you can leave the PC while it copies.
 
 ![xISOBurn for Windows](docs/images/pc-main.png)
 
@@ -68,8 +71,8 @@ administrator.
 | In the window | What it is |
 |---------------|------------|
 | **Drive** | The optical drive to use, with its model and bus (USB, SATA...). **Refresh** lists the drives again |
-| **Copies go to** | The folder for the `.iso`, `.map`, `.sha256` and `.hashes` files (default `Documents\xISOBurn`). **Change...** picks another folder, **Open folder** shows it in Explorer |
-| **Detect disc** | Reads the disc type, size, volume name and protection, and shows them in **Disc** |
+| **Copies go to** | The folder for the copies (default `Documents\xISOBurn`): the `.iso` (or the `.bin` + `.cue` of an audio CD, in a folder of its own), `.map`, `.sha256` and `.hashes` files. **Change...** picks another folder, **Open folder** shows it in Explorer |
+| **Detect disc** | Reads the disc type, size, volume name and protection (and the album and track names of an audio CD), and shows them in **Disc** |
 | **Copy / resume** | Starts the copy, or continues a paused or unfinished one from where it stopped |
 | **Pause / cancel** | Pauses the copy. Nothing is lost: **Copy / resume** continues later, even after the app was closed |
 | **Retry failed** | Tries the sectors that could not be read once more. It is only enabled when there are some |
@@ -100,7 +103,7 @@ Blu-ray images are larger than 4 GiB: the destination must be NTFS or exFAT, not
 
 | Setting | Default | What it does |
 |---------|---------|--------------|
-| File name | empty | Name of the ISO. Empty uses the disc's volume name |
+| File name | empty | Name of the image. Empty uses the disc's volume name, or "Artist - Album" for an audio CD |
 | Destination | empty | Folder for the copies. Empty uses `Documents\xISOBurn` |
 | Write the image | on | Off only tests the drive and builds the map, without saving the ISO |
 | Decrypt CSS and CPPM | on | Off copies DVD-Video and DVD-Audio as they are on the disc, still encrypted |
@@ -116,8 +119,8 @@ Blu-ray images are larger than 4 GiB: the destination must be NTFS or exFAT, not
 | Drive's own retries | do not change | Experimental. Lower values make failing reads give up sooner |
 | First sector / Sectors | 0 / 0 | Copies only part of the disc, for tests. 0 sectors means to the end |
 
-The settings, the logs and the Blu-ray keys are stored in `%LOCALAPPDATA%\xISOBurn`
-(`config.json`, `xisoburn-*.log`, `keys\`). The copy passes, the `.map` format and the CSS and AACS
+The settings, the logs, the Blu-ray keys and the names of the audio CDs already seen are stored in
+`%LOCALAPPDATA%\xISOBurn` (`config.json`, `xisoburn-*.log`, `keys\`, `cdinfo\`). The copy passes, the `.map` format and the CSS and AACS
 details are described in the Xbox repository:
 [how-it-works.md](https://github.com/rubinhos/xisoburn/blob/master/docs/how-it-works.md).
 
@@ -148,7 +151,7 @@ usually differ from redump.org.
 The `.sha256` file holds the hash of the finished image, and the `.hashes` file its size, CRC32,
 MD5, SHA-1 and SHA-256: the checksums [redump.org](http://redump.org) lists, so the copy can be
 checked against its entry. On CSS discs the image is decrypted, so it only matches a Redump entry made
-from decrypted data; turn off **Decrypt CSS** to keep the sectors as on the disc.
+from decrypted data; turn off **Decrypt CSS and CPPM** to keep the sectors as on the disc.
 
 ## Building
 
@@ -180,4 +183,6 @@ version: `git submodule update --remote xisoburn`, then commit the new pointer.
 ## License
 
 GPL-2.0-or-later, like xISOBurn and the libraries it ports (libdvdcss, libaacs, libbdplus). See
-[LICENSE](LICENSE).
+[LICENSE](LICENSE). The code and the specifications the engine builds on (libdvdcss, libaacs, libbdplus,
+GNU ddrescue, MusicBrainz) are credited in the
+[Xbox repository's references](https://github.com/rubinhos/xisoburn#references).
