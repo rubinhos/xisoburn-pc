@@ -87,7 +87,7 @@ namespace xISOBurn
             folderRow.Controls.Add(browse);
 
             row("File name", _outputName);
-            wide(new Label { Text = "Empty uses the disc's volume name.", AutoSize = true, ForeColor = SystemColors.GrayText });
+            wide(new Label { Text = "Empty uses the disc's volume name, or \"Artist - Album\" for an audio CD.", AutoSize = true, ForeColor = SystemColors.GrayText });
             row("Destination", folderRow);
             wide(new Label { Text = "Empty uses " + CopyStore.DefaultFolder + ".", AutoSize = true, ForeColor = SystemColors.GrayText });
             wide(_writeImage);
